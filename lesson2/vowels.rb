@@ -2,8 +2,8 @@
 # alphabet = ("a".."z").to_a
 # vowels = ["a", "e", "i", "o", "u"]
 # vowels_index = {}
-# alphabet.each_with_index do |letter, index| 
-#   vowels_index[letter] = index + 1 if vowels.include?(letter)
+# alphabet.each_with_index(1) do |letter, index| 
+#   vowels_index[letter] = index if vowels.include?(letter)
 # end
 #
 # Вторая версия

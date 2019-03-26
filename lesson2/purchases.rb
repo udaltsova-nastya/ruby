@@ -6,9 +6,9 @@ loop do
   product = gets.chomp
   break if product == "стоп"
   puts "Введите цену за единицу товара"
-  price = Float(gets.chomp)
+  price = gets.chomp.to_f
   puts "Введите количество товара"
-  count =  Float(gets.chomp)
+  count = gets.chomp.to_f
 
   purchases[product] = { price: price, count: count }
 end

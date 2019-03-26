@@ -12,7 +12,7 @@
 #fibonacci_index = 1
 
 # Бесконечный цикл
-#while true do
+#loop do
   # Текущее число Фибоначчи
 #  current_fibonacci_number = fibonacci(fibonacci_index)
   # Прерываем цикл while, если текущее число Фиббоачи больше 100
@@ -22,11 +22,9 @@
 #  fibonacci_index += 1
 #end
 #Второй вариант решения
-fibonacci = [1, 1]
-current_fibonacci_number = 2
- while current_fibonacci_number < 100 do
- 	# так же есть вариант fibonacci.push(current_fibonacci_number)
- 	 fibonacci << current_fibonacci_number
- 	 current_fibonacci_number = fibonacci.last + fibonacci[-2]
- end
- puts fibonacci
+fibonacci = [0, 1, 1]
+
+while (current_fibonacci_number = fibonacci.last + fibonacci[-2]) < 100 do
+  fibonacci << current_fibonacci_number
+end
+puts fibonacci
