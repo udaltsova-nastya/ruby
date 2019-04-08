@@ -13,9 +13,11 @@ class Route
     @last_station = last_station
     @middle_stations = []
   end
-
-  def add_station(name)
-   middle_stations << name
+ # по условию пользователь может добавлять и удалять только промежуточные станции. 
+ # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности
+ # первой и последней станций
+  def add_station(index, name)
+    middle_stations.insert(index, name)
   end
 
   def remove_station(name)

@@ -15,29 +15,35 @@
 # 9. Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад, но только на 1 станцию за раз.
 # 10. Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
 
-class Train
-  attr_reader :speed
-  attr_reader :cars_count
-  attr_reader :route_current_station
-  
-  def initialize (number, type, cars_count)
-    types = ["freight", "passenger"]
+# типы поездов относятся к классу в целом, поэтому ввела константы
+# также ввела ограничение по скорости, потому что поезд не может разгоняться до бесконечности и шаг разгона
 
+class Train
+  TYPES = ["freight", "passenger"]
+  MAX_SPEED = 100
+  SPEED_STEP = 10
+
+  attr_reader :speed, :cars_count, :route_current_station
+    
+  def initialize(number, type, cars_count)
     @number = number
     @type = type
-    raise ArgumentError, "Укажите тип: 'freight' - грузовой или 'passenger' - пассажирский" unless types.include?(@type)
+    raise ArgumentError, "Укажите тип: 'freight' - грузовой или 'passenger' - пассажирский" unless TYPES.include?(@type)
     @cars_count = cars_count
     @speed = 0
-    @route = nil
-    @route_current_station = nil
   end
 
-  def go
-    @speed = 100
+  def accelerate
+    if @speed + SPEED_STEP <= MAX_SPEED
+      @speed += SPEED_STEP
+    else
+      @speed = MAX_SPEED
+    end
   end
 
-  def stop
-    @speed = 0
+  def decelerate
+    return if stopped? 
+    @speed -= SPEED_STEP
   end
 
   def stopped?
@@ -45,11 +51,11 @@ class Train
   end
   
   def add_car
-    @cars_count = cars_count += 1 if stopped?
+    @cars_count += 1 if stopped?
   end
   
   def remove_car
-    @cars_count = cars_count -= 1 if stopped?
+    @cars_count -= 1 if stopped?
   end
 
   def set_route(route)
@@ -62,12 +68,12 @@ class Train
   end
 
   def route_next_station
-    return nil if route_current_station_index >= @route.stations.count - 1
+    return nil if @route_current_station == @route.stations.last
     @route.stations[route_current_station_index + 1]
   end
 
   def route_prev_station
-    return nil if route_current_station_index < 1
+    return nil if @route_current_station == @route.stations.first
     @route.stations[route_current_station_index - 1]
   end
 

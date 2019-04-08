@@ -17,17 +17,13 @@ class Station
     @trains << train
   end
 
-  # Кол-во поздов указанного типа на станции
-  def trains_count_by_type(type)
-    count = 0
-    @trains.each do |train|
-      count += 1 if train.type == type
-    end
-    count
+  # Кол-во поездов указанного типа на станции
+  def count_trains_by_type(type)
+    @trains.count { |train| train.type == type }
   end
 
   # Отправка поезда:
-  # Убираем поезд из списка поздов на станции
+  # Убираем поезд из списка поездов на станции
   # Возвращаем отправленный поезд или nil, если указанный поезд не найден в списке
   def send_train(train)
     @trains.delete(train)
