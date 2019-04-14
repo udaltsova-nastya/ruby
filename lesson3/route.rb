@@ -19,12 +19,12 @@ class Route
   # по условию пользователь может добавлять и удалять только промежуточные станции. 
   # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности
   # первой и последней станций
-  def add_station(index, name)
-    middle_stations.insert(index, name)
+  def add_station(index, station)
+    middle_stations.insert(index, station)
   end
 
-  def remove_station(name)
-    middle_stations.delete(name)
+  def remove_station(station)
+    middle_stations.delete(station)
   end
 
   def stations

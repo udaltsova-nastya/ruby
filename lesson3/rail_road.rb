@@ -1,5 +1,7 @@
 # поезда, маршруты, станции
 class RailRoad
+  attr_reader :trains
+
   def initialize
     @stations = []
     @trains = []
