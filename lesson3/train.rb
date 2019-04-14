@@ -19,52 +19,51 @@
 # также ввела ограничение по скорости, потому что поезд не может разгоняться до бесконечности и шаг разгона
 
 class Train
-  TYPES = ["freight", "passenger"]
-  MAX_SPEED = 100
-  SPEED_STEP = 10
-
-  attr_reader :speed, :cars_count, :route_current_station
+  attr_reader :speed, :route_current_station, :number, :type
     
-  def initialize(number, type, cars_count)
+  def initialize(number)
     @number = number
-    @type = type
-    raise ArgumentError, "Укажите тип: 'freight' - грузовой или 'passenger' - пассажирский" unless TYPES.include?(@type)
-    @cars_count = cars_count
     @speed = 0
+    @wagons = []
+    assign_type
   end
 
   def accelerate
-    if @speed + SPEED_STEP <= MAX_SPEED
-      @speed += SPEED_STEP
+    if @speed + speed_step <= max_speed
+      @speed += speed_step
     else
-      @speed = MAX_SPEED
+      @speed = max_speed
     end
   end
 
   def decelerate
     return if stopped? 
-    @speed -= SPEED_STEP
+    @speed -= speed_step
   end
 
   def stopped?
     @speed == 0
   end
   
-  def add_car
-    @cars_count += 1 if stopped?
+  def add_wagon(wagon)
+    raise ArgumentError, "Выберите вагон согласно типу поезда" unless valid_wagon_type?(wagon)
+    return unless stopped?
+    @wagons << wagon
   end
   
-  def remove_car
-    @cars_count -= 1 if stopped?
+  # удаляет последний вагон из поезда
+  def remove_wagon
+    return unless stopped?
+    @wagons.pop
   end
 
+  def wagons_count
+    @wagons.size
+  end
+  # назначение маршрута
   def set_route(route)
     @route = route
     @route_current_station = @route.stations.first
-  end
-
-  def route_current_station_index
-    @route.stations.index(route_current_station)
   end
 
   def route_next_station
@@ -77,6 +76,7 @@ class Train
     @route.stations[route_current_station_index - 1]
   end
 
+  # Перемещение вперед по маршруту на одну станцию
   def move_forward
     raise StandardError, "Не задан маршрут" unless @route
     raise StandardError, "Поезд уже на последней станции маршрута" unless route_next_station
@@ -87,5 +87,34 @@ class Train
     raise StandardError, "Не задан маршрут" unless @route
     raise StandardError, "Поезд уже на первой станции маршрута" unless route_prev_station
     @route_current_station = route_prev_station
+  end
+
+  protected
+
+  # эти методы можно переопределить в подклассах 
+
+  def max_speed
+    200
+  end
+
+  def speed_step
+    10
+  end
+
+  # установить тип поезда
+  def assign_type
+    @type = :standard
+  end 
+
+  # проверка что переданный вагон имеет соответствующий поезду тип (пассажирский или грузовой)
+  def valid_wagon_type?(wagon)
+    wagon.type == @type
+  end
+
+  private
+
+  # это внутренний метод, не требует переопределения
+  def route_current_station_index
+    @route.stations.index(route_current_station)
   end
 end

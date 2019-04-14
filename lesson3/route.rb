@@ -8,14 +8,17 @@
 # 5. Может выводить список всех станций по-порядку от начальной до конечной
 
 class Route
-  def initialize(first_station, last_station)
+  attr_reader :name
+
+  def initialize(route_name, first_station, last_station)
+    @name = route_name
     @first_station = first_station
     @last_station = last_station
     @middle_stations = []
   end
- # по условию пользователь может добавлять и удалять только промежуточные станции. 
- # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности
- # первой и последней станций
+  # по условию пользователь может добавлять и удалять только промежуточные станции. 
+  # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности
+  # первой и последней станций
   def add_station(index, name)
     middle_stations.insert(index, name)
   end
