@@ -10,8 +10,8 @@
 class Route
   attr_reader :name
 
-  def initialize(route_name, first_station, last_station)
-    @name = route_name
+  def initialize(first_station, last_station)
+    @name = "#{first_station.name} - #{last_station.name}"
     @first_station = first_station
     @last_station = last_station
     @middle_stations = []
@@ -20,15 +20,15 @@ class Route
   # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности
   # первой и последней станций
   def add_station(index, station)
-    middle_stations.insert(index, station)
+    @middle_stations.insert(index, station)
   end
 
   def remove_station(station)
-    middle_stations.delete(station)
+    @middle_stations.delete(station)
   end
 
   def stations
-    [first_station] + middle_stations + [last_station]
+    [@first_station] + @middle_stations + [@last_station]
   end
 end 
 

@@ -1,5 +1,6 @@
 class RailRoadInterface
-  
+  attr_reader :rail_road
+
   def initialize
     @rail_road = RailRoad.new
   end
@@ -44,7 +45,6 @@ class RailRoadInterface
     puts "2 - вывести список станций"
     puts "3 - получить список поездов на станции"
     gets.chomp.to_i
-
   end
 
   def route_menu_action
@@ -60,7 +60,7 @@ class RailRoadInterface
   def main_menu_process(action)
     case action
     when 1
-      train_menu_process(train_munu_action)
+      train_menu_process(train_menu_action)
     when 2
       station_menu_process(station_menu_action)
     when 3
@@ -118,8 +118,15 @@ class RailRoadInterface
 
   def show_stations_list
     puts "Список станций:"
-    rail_road.stations.each_with_index(1) do |station, index|
+    rail_road.stations.each.with_index(1) do |station, index|
       puts "#{index} - #{station.name}"
+    end
+  end
+
+  def show_routes_list
+    puts "Список маршрутов:"
+    rail_road.routes.each.with_index(1) do |route, index|
+      puts "#{index} - #{route.name}"
     end
   end
 
@@ -136,9 +143,9 @@ class RailRoadInterface
     end
   end
 
-  def show_trains_list(trains)
-    trains.each_with_index(1) do |train, index|
-      puts "#{index} - #{train.number}"
+  def show_trains_list
+    rail_road.trains.each.with_index(1) do |train, index|
+      puts "#{index}. Поезд #{train.number}, вагонов #{train.wagons_count}, тип #{train.type}"
     end
   end
 
@@ -146,24 +153,14 @@ class RailRoadInterface
     rail_road.create_station(station_name)
   end
 
-  def get_route_name
-    puts "Введите название маршрута:"
-    gets.chomp
-  end
-
   def create_route
-    route_name = get_route_name
-    first_station = rail_road.find_or_create_station(get_station_name)
-    last_station = rail_road.find_or_create_station(get_station_name)
-    rail_road.create_route(route_name, first_station, last_station)
-  end
-
-  def find_route
-    rail_road.find_route(get_route_name)
+    first_station_name = get_station_name
+    last_station_name = get_station_name
+    rail_road.create_route(first_station_name, last_station_name)
   end
 
   def add_station_to_route
-    route = find_route
+    route = select_route
     if route
       station = find_or_create_station
       puts "Введите порядковый номер станции в маршруте"
@@ -174,7 +171,7 @@ class RailRoadInterface
     end
 
     def remove_station_from_route
-      route = find_route
+      route = select_route
       if route
         station = find_station
         route.remove_station(station)
@@ -202,17 +199,18 @@ class RailRoadInterface
     rail_road.create_train(train_type, train_number) 
   end
 
-  def show_trains_list
-    rail_road.trains.each_with_index(1) do { |train, index|
-      puts "#{index}. Поезд #{train.number}, вагонов #{train.wagons_count}, тип #{train.type}"
-    }
-  end
-
   def select_train
     puts "Выберите поезд:"
     show_trains_list
     train_index = gets.chomp.to_i - 1
     rail_road.trains[train_index]
+  end
+
+  def select_route
+    puts "Выберите маршрут:"
+    show_routes_list
+    route_index = gets.chomp.to_i - 1
+    rail_road.routes[route_index]
   end
 
   def add_wagon_to_train
@@ -236,7 +234,7 @@ class RailRoadInterface
   def set_route_to_train
     train = select_train
     if train
-      route = find_route
+      route = select_route
       if route
         train.set_route(route)
       else
@@ -250,7 +248,7 @@ class RailRoadInterface
   def move_train_forward
     train = select_train
     if train
-      train.move_forkward
+      train.move_forward
     else
       puts "Поезд не найден"
     end

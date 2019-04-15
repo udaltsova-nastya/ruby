@@ -1,6 +1,6 @@
 # поезда, маршруты, станции
 class RailRoad
-  attr_reader :trains
+  attr_reader :trains, :stations, :routes
 
   def initialize
     @stations = []
@@ -15,7 +15,9 @@ class RailRoad
 
   # создает и возвращает созданную станцию
   def create_station(station_name)
-    Station.new(station_name)
+    new_station = Station.new(station_name)
+    @stations << new_station
+    new_station
   end
 
   # Создаем станцию по названию станции, если она еще не создана
@@ -24,13 +26,11 @@ class RailRoad
   def find_or_create_station(station_name)
     station = find_station(station_name)
     return station if station
-    new_station = create_station(station_name)
-    @stations << new_station
-    new_station
+    create_station(station_name)
   end
 
   # создает и возвращает новый маршрут с указанием первой и последней станций
-  def create_route(route_name, first_station_name, last_station_name)
+  def create_route(first_station_name, last_station_name)
     first_station = find_or_create_station(first_station_name)
     last_station = find_or_create_station(last_station_name)
     new_route = Route.new(first_station, last_station)
@@ -62,8 +62,8 @@ class RailRoad
     case type
     when :standard
       Wagon.new
-    when :passendger
-      PessengerWagon.new
+    when :passenger
+      PassengerWagon.new
     when :cargo
       CargoWagon.new
     end
