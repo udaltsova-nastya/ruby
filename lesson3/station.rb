@@ -25,7 +25,7 @@ class Station
   # Отправка поезда:
   # Убираем поезд из списка поездов на станции
   # Возвращаем отправленный поезд или nil, если указанный поезд не найден в списке
-  def send_train(train)
+  def remove_train(train)
     @trains.delete(train)
   end
 end

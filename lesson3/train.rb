@@ -60,10 +60,10 @@ class Train
   def wagons_count
     @wagons.size
   end
-  # назначение маршрута
+  # назначение маршрута, при назначении маршрута поезд перемещается на первую станцию маршрута
   def set_route(route)
     @route = route
-    @route_current_station = @route.stations.first
+    move_to_route_first_station
   end
 
   def route_next_station
@@ -80,13 +80,17 @@ class Train
   def move_forward
     raise StandardError, "Не задан маршрут" unless @route
     raise StandardError, "Поезд уже на последней станции маршрута" unless route_next_station
+    remove_self_from_station(@route_current_station)
     @route_current_station = route_next_station
+    add_self_to_station(@route_current_station)
   end
 
   def move_backward
     raise StandardError, "Не задан маршрут" unless @route
     raise StandardError, "Поезд уже на первой станции маршрута" unless route_prev_station
+    remove_self_from_station(@route_current_station)
     @route_current_station = route_prev_station
+    add_self_to_station(@route_current_station)
   end
 
   protected
@@ -115,6 +119,21 @@ class Train
 
   # это внутренний метод, не требует переопределения
   def route_current_station_index
-    @route.stations.index(route_current_station)
+    @route.stations.index(@route_current_station)
+  end
+
+  def move_to_route_first_station
+    @route_current_station = @route.stations.first
+    add_self_to_station(@route_current_station)
+  end
+
+  # уведомляем станцию, что на нее прибыл поезд
+  def add_self_to_station(station)
+    station.add_train(self)
+  end
+
+  # уведомляем станцию, что поезд с нее убыл
+  def remove_self_from_station(station)
+    station.remove_train(self)
   end
 end

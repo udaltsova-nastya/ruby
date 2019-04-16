@@ -20,7 +20,7 @@ class Route
   # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности
   # первой и последней станций
   def add_station(index, station)
-    @middle_stations.insert(index, station)
+    @middle_stations.insert(index - 1, station)
   end
 
   def remove_station(station)

@@ -136,15 +136,17 @@ class RailRoadInterface
 
   def show_trains_list_on_station(station)
     if station
-      puts "Список поездов на станции #{station_name}:"
+      puts "Список поездов на станции #{station.name}:"
       show_trains_list(station.trains)
     else
       puts "Станция не найдена"
     end
   end
 
-  def show_trains_list
-    rail_road.trains.each.with_index(1) do |train, index|
+  # Отображаем переданный список поездов
+  # Если список поездов не передан, то отображаем список всех поездов на железной дороге
+  def show_trains_list(trains = rail_road.trains)
+    trains.each.with_index(1) do |train, index|
       puts "#{index}. Поезд #{train.number}, вагонов #{train.wagons_count}, тип #{train.type}"
     end
   end
