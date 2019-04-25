@@ -6,8 +6,12 @@
 # 3. Может добавлять промежуточную станцию в список
 # 4. Может удалять промежуточную станцию из списка
 # 5. Может выводить список всех станций по-порядку от начальной до конечной
+require_relative 'instance_counter'
 
 class Route
+  
+  include InstanceCounter
+
   attr_reader :name
 
   def initialize(first_station, last_station)
@@ -15,6 +19,7 @@ class Route
     @first_station = first_station
     @last_station = last_station
     @middle_stations = []
+    register_instance
   end
   # по условию пользователь может добавлять и удалять только промежуточные станции. 
   # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности

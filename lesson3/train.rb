@@ -17,15 +17,33 @@
 
 # типы поездов относятся к классу в целом, поэтому ввела константы
 # также ввела ограничение по скорости, потому что поезд не может разгоняться до бесконечности и шаг разгона
+# Подключить модуль к классам Вагон и Поезд
+# Добавить к поезду атрибут Номер (произвольная строка), если его еще нет, который указыватеся при его создании
+# В классе Train создать метод класса find, который принимает номер поезда (указанный при его создании) 
+# и возвращает объект поезда по номеру или nil, если поезд с таким номером не найден.
+require_relative 'manufacturer'
+require_relative 'instance_counter'
 
 class Train
+  include Manufacturer
+  include InstanceCounter
+
   attr_reader :speed, :route_current_station, :number, :type
+ 
+  #@@trains = []
+  @@trains = {}
+
+  def self.find(number)
+    @@trains[number]
+  end
     
   def initialize(number)
     @number = number
     @speed = 0
     @wagons = []
+    @@trains[number] = self 
     assign_type
+    register_instance
   end
 
   def accelerate
