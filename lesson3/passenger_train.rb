@@ -5,4 +5,8 @@ class PassengerTrain < Train
   def assign_type
     @type = :passenger
   end
+
+  def human_readable_type
+    "пассажирский"
+  end
 end

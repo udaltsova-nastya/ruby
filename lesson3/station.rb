@@ -5,24 +5,25 @@
 # 4. Может возвращать список поездов на станции по типу (см. ниже): кол-во грузовых, пассажирских
 # 5. Может отправлять поезда (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции).
 # 6. В классе Station (жд станция) создать метод класса all, который возвращает все станции (объекты), созданные на данный момент
-require_relative 'instance_counter'
+require_relative "instance_counter"
+require_relative "errors_list"
 
 class Station
-
   include InstanceCounter
+  include ErrorsList
+
+  NAME_PATTERN = /^[а-яa-z]/i
+  NAME_MIN_LENGTH = 3
 
   attr_reader :trains, :name
  
-  @@stations_count = 0
-
-  def self.all
-    @@stations_count
-  end
-
   def initialize(name)
-    @name = name
+    # name переводим в string, чтобы дополнительно не проверять на nil
+    @name = name.to_s    
+    validate_name
+    raise_on_validations_error
+
     @trains = []
-    @@stations_count += 1
     register_instance
   end
 
@@ -40,5 +41,14 @@ class Station
   # Возвращаем отправленный поезд или nil, если указанный поезд не найден в списке
   def remove_train(train)
     @trains.delete(train)
+  end
+
+  protected
+
+  def validate_name
+    # имя не должно быть пустым
+    # должно начинаться с буквы и содержать не менее 3х символов
+    add_error("Название станции должно содержать не менее трех символов") if name.length < NAME_MIN_LENGTH
+    add_error("Название станции должно начинаться с буквы") unless NAME_PATTERN.match?(name)
   end
 end

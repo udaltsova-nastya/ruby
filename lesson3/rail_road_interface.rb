@@ -192,13 +192,18 @@ class RailRoadInterface
 
   def get_train_number
     puts "Введите номер поезда"
-    gets.chomp.to_i
+    gets.chomp
   end
 
   def create_train
     train_type = get_train_type
     train_number = get_train_number
-    rail_road.create_train(train_type, train_number) 
+    train = rail_road.create_train(train_type, train_number)
+    puts "Создан #{train}"
+  rescue ArgumentError => e
+    puts "Не удалось создать поезд:"
+    puts e.message
+    retry
   end
 
   def select_train

@@ -21,16 +21,20 @@
 # Добавить к поезду атрибут Номер (произвольная строка), если его еще нет, который указыватеся при его создании
 # В классе Train создать метод класса find, который принимает номер поезда (указанный при его создании) 
 # и возвращает объект поезда по номеру или nil, если поезд с таким номером не найден.
-require_relative 'manufacturer'
-require_relative 'instance_counter'
+require_relative "manufacturer"
+require_relative "instance_counter"
+require_relative "errors_list"
 
 class Train
   include Manufacturer
   include InstanceCounter
+  include ErrorsList
+
+  # три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет) и еще 2 буквы или цифры после дефиса
+  NUMBER_PATTERN = /^[a-zа-я0-9]{3}-?[a-zа-я0-9]{2}$/i
 
   attr_reader :speed, :route_current_station, :number, :type
  
-  #@@trains = []
   @@trains = {}
 
   def self.find(number)
@@ -39,6 +43,9 @@ class Train
     
   def initialize(number)
     @number = number
+    validate_number
+    raise_on_validations_error
+
     @speed = 0
     @wagons = []
     @@trains[number] = self 
@@ -78,6 +85,7 @@ class Train
   def wagons_count
     @wagons.size
   end
+
   # назначение маршрута, при назначении маршрута поезд перемещается на первую станцию маршрута
   def set_route(route)
     @route = route
@@ -109,6 +117,14 @@ class Train
     remove_self_from_station(@route_current_station)
     @route_current_station = route_prev_station
     add_self_to_station(@route_current_station)
+  end
+
+  def human_readable_type
+    "обычный"
+  end
+
+  def to_s
+    "#{human_readable_type} поезд № #{number}"
   end
 
   protected
@@ -153,5 +169,9 @@ class Train
   # уведомляем станцию, что поезд с нее убыл
   def remove_self_from_station(station)
     station.remove_train(self)
+  end
+
+  def validate_number
+    add_error("Номер поезда должен соответствовать шаблону XXX[-][YY]") unless NUMBER_PATTERN.match?(number)
   end
 end
