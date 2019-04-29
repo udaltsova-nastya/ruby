@@ -21,7 +21,7 @@ class Station
     # name переводим в string, чтобы дополнительно не проверять на nil
     @name = name.to_s    
     validate_name
-    raise_on_validations_error
+    validate!
 
     @trains = []
     register_instance

@@ -20,7 +20,7 @@ module ErrorsList
   end
 
   # в случае, если есть ошибки валидации - выбрасывает исключение ArgumentError
-  def raise_on_validations_error
+  def validate!
     raise ArgumentError, errors_message unless valid?
   end
 end

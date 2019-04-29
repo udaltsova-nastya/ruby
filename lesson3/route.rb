@@ -17,7 +17,7 @@ class Route
 
   def initialize(first_station, last_station)
     validate_stations(first_station, last_station)
-    raise_on_validations_error
+    validate!
 
     @name = "#{first_station.name} - #{last_station.name}"
     @first_station = first_station
@@ -31,14 +31,14 @@ class Route
   # первой и последней станций
   def add_station(index, station)
     validate_station(station, "Промежуточная станция")
-    raise_on_validations_error
+    validate!
 
     @middle_stations.insert(index - 1, station)
   end
 
   def remove_station(station)
     validate_station(station, "Промежуточная станция")
-    raise_on_validations_error
+    validate!
 
     @middle_stations.delete(station)
   end

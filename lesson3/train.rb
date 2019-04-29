@@ -44,7 +44,7 @@ class Train
   def initialize(number)
     @number = number
     validate_number
-    raise_on_validations_error
+    validate!
 
     @speed = 0
     @wagons = []
