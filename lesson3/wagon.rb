@@ -9,6 +9,10 @@ class Wagon
     assign_type
   end
 
+  def human_readable_type
+    "обычный"
+  end
+
   protected
 
   def assign_type

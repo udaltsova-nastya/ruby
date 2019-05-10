@@ -35,6 +35,9 @@ class RailRoadInterface
     puts "4 - назначить маршрут поезду"
     puts "5 - переместить поезд по маршруту вперед"
     puts "6 - переместить поезд по маршруту назад"
+    puts "7 - занять место в вагоне"
+    puts "8 - список поездов"
+    puts "9 - список вагонов в поезде"
     gets.chomp.to_i
   end
 
@@ -82,6 +85,12 @@ class RailRoadInterface
       move_train_forward
     when 6 
       move_train_backward
+    when 7
+      occupy_wagon
+    when 8
+      show_trains_list
+    when 9
+      show_train_wagons_list
     end
   end
 
@@ -147,8 +156,44 @@ class RailRoadInterface
   # Если список поездов не передан, то отображаем список всех поездов на железной дороге
   def show_trains_list(trains = rail_road.trains)
     trains.each.with_index(1) do |train, index|
-      puts "#{index}. Поезд #{train.number}, вагонов #{train.wagons_count}, тип #{train.type}"
+      # print -- чтобы не было лишнего перевода на новую строку
+      print "#{index}. Поезд #{train.human_readable_type} № #{train.number}, вагонов #{train.wagons_count}"
+      case train.type
+      when :cargo
+        # Первый вариант получения доступного для загрузки объема по всем вагонам поезда:
+        # train_free_volume = 0
+        # train.iterate_wagons { |wagon| train_free_volume += wagon.free_volume }
+        # puts " доступно для загрузки: #{train_free_volume} тонн"
+        print ", загружено #{train.taken_volume} тонн"
+        puts ", доступно для загрузки: #{train.free_volume} тонн"
+      when :passenger
+        print ", занятых мест: #{train.taken_seats_count}"
+        puts ", свободных мест: #{train.free_seats_count}"
+      else
+        puts
+      end
     end
+  end
+
+  def show_train_wagons_list
+    train = select_train
+    if train
+      train.iterate_wagons do |wagon, wagon_number|
+        print "#{wagon_number}. Вагон #{wagon.human_readable_type}"
+        case wagon.type
+        when :passenger
+          print ", занятых мест: #{wagon.taken_seats_count}"
+          puts ", свободных мест: #{wagon.free_seats_count}"
+        when :cargo
+          print ", загружено #{wagon.taken_volume} тонн"
+          puts ", доступно для загрузки: #{wagon.free_volume} тонн"
+        else
+          puts
+        end
+      end
+    else
+      puts "Поезд не найден"
+    end    
   end
 
   def create_station(station_name)
@@ -223,10 +268,74 @@ class RailRoadInterface
   def add_wagon_to_train
     train = select_train
     if train
-      rail_road.add_wagon_to_train(train)
+      wagon_attributes = get_wagon_attributes(train)
+      rail_road.add_wagon_to_train(train, wagon_attributes)
     else
       puts "Поезд не найден"
     end
+    puts "Вагон добавлен к поезду №#{train.number}"
+    puts "Общее количество вагонов в поезде: #{train.wagons_count}"
+  end
+
+  def get_wagon_attributes(train)
+    case train.type
+    when :cargo
+      puts "Укажите вместимость вагона (в тоннах)"
+      puts "По умолчанию #{rail_road.cargo_wagon_default_volume} тонн"
+      volume = gets.chomp.to_i
+      volume = nil if volume == 0
+      volume
+    when :passenger
+      puts "Укажите кол-во мест в вагоне"
+      puts "По умолчанию #{rail_road.passenger_wagon_default_seats_count} мест"
+      seats_count = gets.chomp.to_i
+      seats_count = nil if seats_count == 0
+      seats_count
+    else
+      nil
+    end
+  end
+
+  def occupy_wagon
+    train = select_train
+    if train
+      wagon = select_wagon(train)
+      if wagon
+        case wagon.type
+        when :passenger
+          if wagon.take_seat
+            puts "Место в вагоне успешно занято"
+            puts "Осталось свободных мест: #{wagon.free_seats_count}"
+          else
+            puts "Не удалось занять место в вагоне"
+          end
+        when :cargo
+          puts "Доступно для загрузки #{wagon.free_volume} тонн"
+          puts "Укажите объем загрузки (в тоннах):"
+          volume = gets.chomp.to_i
+          if wagon.take_volume(volume)
+            puts "Вагон успешно загружен"
+            puts "Осталось свободного места для загрузки: #{wagon.free_volume}"
+          else
+            puts "Не удалось загрузить вагон"
+          end
+        else
+          puts "Невозможно загрузить или занять место в данном типе вагона"
+        end
+      else
+        puts "Вагон не найден"
+      end
+    else
+      puts "Поезд не найден"
+    end
+  end
+
+  def select_wagon(train)
+    return nil if train.wagons_count == 0
+
+    puts "Выберите вагон: от 1 до #{train.wagons_count}"
+    wagon_index = gets.chomp.to_i - 1
+    train.wagons[wagon_index]
   end
 
   def remove_wagon_from_train

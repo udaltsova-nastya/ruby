@@ -21,6 +21,8 @@
 # Добавить к поезду атрибут Номер (произвольная строка), если его еще нет, который указыватеся при его создании
 # В классе Train создать метод класса find, который принимает номер поезда (указанный при его создании) 
 # и возвращает объект поезда по номеру или nil, если поезд с таким номером не найден.
+# написать метод, который принимает блок и проходит по всем вагонам поезда (вагоны должны быть во внутреннем массиве),
+# передавая каждый объект вагона в блок.
 require_relative "manufacturer"
 require_relative "instance_counter"
 require_relative "errors_list"
@@ -33,7 +35,7 @@ class Train
   # три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет) и еще 2 буквы или цифры после дефиса
   NUMBER_PATTERN = /^[a-zа-я0-9]{3}-?[a-zа-я0-9]{2}$/i
 
-  attr_reader :speed, :route_current_station, :number, :type
+  attr_reader :speed, :route_current_station, :number, :type, :wagons
  
   @@trains = {}
 
@@ -125,6 +127,14 @@ class Train
 
   def to_s
     "#{human_readable_type} поезд № #{number}"
+  end
+
+  # train.iterate_wagons { |wagon, wagon_number| ... }
+  def iterate_wagons
+    raise ArgumentError, "Необходимо передать блок" unless block_given?
+    @wagons.each.with_index(1) do |wagon, wagon_number|
+      yield wagon, wagon_number
+    end
   end
 
   protected

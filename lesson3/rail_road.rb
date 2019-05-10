@@ -58,19 +58,27 @@ class RailRoad
     @train.find { |train| train.number == train_number }
   end
 
-  def create_wagon_by_type(type)
+  def cargo_wagon_default_volume
+    CargoWagon::DEFAULT_VOLUME
+  end
+
+  def passenger_wagon_default_seats_count 
+    PassengerWagon::DEFAULT_SEATS_COUNT
+  end
+
+  def create_wagon_by_type(type, wagon_attributes)
     case type
     when :standard
       Wagon.new
     when :passenger
-      PassengerWagon.new
+      PassengerWagon.new(total_seats_count: wagon_attributes)
     when :cargo
-      CargoWagon.new
+      CargoWagon.new(total_volume: wagon_attributes)
     end
   end
 
-  def add_wagon_to_train(train)
-    new_wagon = create_wagon_by_type(train.type)
+  def add_wagon_to_train(train, wagon_attributes)
+    new_wagon = create_wagon_by_type(train.type, wagon_attributes)
     train.add_wagon(new_wagon)
   end
 end

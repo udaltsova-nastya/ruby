@@ -24,5 +24,4 @@ require_relative "station"
 require_relative "rail_road"
 require_relative "rail_road_interface"
 
-RailRoadInterface.new.run 
-  
+RailRoadInterface.new.run
