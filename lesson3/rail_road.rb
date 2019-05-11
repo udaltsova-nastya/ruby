@@ -44,7 +44,7 @@ class RailRoad
   
   # создаем поезд указанного типа, по умолчанию - пассажирский
   def create_train(train_type, train_number)
-    if train_type == 2
+    if train_type == :cargo
       new_train = CargoTrain.new(train_number)
     else
       new_train = PassengerTrain.new(train_number)
@@ -66,19 +66,19 @@ class RailRoad
     PassengerWagon::DEFAULT_SEATS_COUNT
   end
 
-  def create_wagon_by_type(type, wagon_attributes)
+  def create_wagon_by_type(type, total_space)
     case type
     when :standard
       Wagon.new
     when :passenger
-      PassengerWagon.new(total_seats_count: wagon_attributes)
+      PassengerWagon.new(total_space)
     when :cargo
-      CargoWagon.new(total_volume: wagon_attributes)
+      CargoWagon.new(total_space)
     end
   end
 
-  def add_wagon_to_train(train, wagon_attributes)
-    new_wagon = create_wagon_by_type(train.type, wagon_attributes)
+  def add_wagon_to_train(train, wagon_total_space = nil)
+    new_wagon = create_wagon_by_type(train.type, wagon_total_space)
     train.add_wagon(new_wagon)
   end
 end

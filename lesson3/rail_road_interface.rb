@@ -1,8 +1,8 @@
 class RailRoadInterface
   attr_reader :rail_road
 
-  def initialize
-    @rail_road = RailRoad.new
+  def initialize(rail_road)
+    @rail_road = rail_road
   end
 
   def run
@@ -158,20 +158,8 @@ class RailRoadInterface
     trains.each.with_index(1) do |train, index|
       # print -- чтобы не было лишнего перевода на новую строку
       print "#{index}. Поезд #{train.human_readable_type} № #{train.number}, вагонов #{train.wagons_count}"
-      case train.type
-      when :cargo
-        # Первый вариант получения доступного для загрузки объема по всем вагонам поезда:
-        # train_free_volume = 0
-        # train.iterate_wagons { |wagon| train_free_volume += wagon.free_volume }
-        # puts " доступно для загрузки: #{train_free_volume} тонн"
-        print ", загружено #{train.taken_volume} тонн"
-        puts ", доступно для загрузки: #{train.free_volume} тонн"
-      when :passenger
-        print ", занятых мест: #{train.taken_seats_count}"
-        puts ", свободных мест: #{train.free_seats_count}"
-      else
-        puts
-      end
+      print ", занято #{train.taken_space} "
+      puts ", доступно : #{train.free_space} "
     end
   end
 
@@ -180,16 +168,8 @@ class RailRoadInterface
     if train
       train.iterate_wagons do |wagon, wagon_number|
         print "#{wagon_number}. Вагон #{wagon.human_readable_type}"
-        case wagon.type
-        when :passenger
-          print ", занятых мест: #{wagon.taken_seats_count}"
-          puts ", свободных мест: #{wagon.free_seats_count}"
-        when :cargo
-          print ", загружено #{wagon.taken_volume} тонн"
-          puts ", доступно для загрузки: #{wagon.free_volume} тонн"
-        else
-          puts
-        end
+        print ", занятo: #{wagon.taken_space}"
+        puts ", свободнo: #{wagon.free_space}"
       end
     else
       puts "Поезд не найден"
@@ -232,7 +212,13 @@ class RailRoadInterface
     puts "Введите тип поезда:"
     puts "1 - пассажирский (по умолчанию)"
     puts "2 - грузовой"
-    gets.chomp.to_i
+    train_type = gets.chomp.to_i
+    case train_type
+    when 1
+      :passenger
+    when 2
+      :cargo
+    end
   end
 
   def get_train_number
@@ -303,19 +289,19 @@ class RailRoadInterface
       if wagon
         case wagon.type
         when :passenger
-          if wagon.take_seat
+          if wagon.take_space
             puts "Место в вагоне успешно занято"
-            puts "Осталось свободных мест: #{wagon.free_seats_count}"
+            puts "Осталось свободных мест: #{wagon.free_space}"
           else
             puts "Не удалось занять место в вагоне"
           end
         when :cargo
-          puts "Доступно для загрузки #{wagon.free_volume} тонн"
+          puts "Доступно для загрузки #{wagon.free_space} тонн"
           puts "Укажите объем загрузки (в тоннах):"
-          volume = gets.chomp.to_i
-          if wagon.take_volume(volume)
+          space = gets.chomp.to_i
+          if wagon.take_space(space)
             puts "Вагон успешно загружен"
-            puts "Осталось свободного места для загрузки: #{wagon.free_volume}"
+            puts "Осталось свободного места для загрузки: #{wagon.free_space}"
           else
             puts "Не удалось загрузить вагон"
           end

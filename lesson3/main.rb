@@ -23,5 +23,12 @@ require_relative "route"
 require_relative "station"
 require_relative "rail_road"
 require_relative "rail_road_interface"
+require_relative "rail_road_test"
 
-RailRoadInterface.new.run
+rail_road = RailRoad.new
+rail_road_interface = RailRoadInterface.new(rail_road)
+
+# Создаем тестовые данные (станции, поезда, вагоны) и связываем их между собой
+RailRoadTest.init(rail_road)
+
+rail_road_interface.run

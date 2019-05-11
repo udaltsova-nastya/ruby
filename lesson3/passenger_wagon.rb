@@ -5,23 +5,7 @@
 class PassengerWagon < Wagon
   
   DEFAULT_SEATS_COUNT = 54
-  attr_reader :taken_seats_count
-
-  def initialize(total_seats_count: DEFAULT_SEATS_COUNT)
-    super()
-    @total_seats_count = total_seats_count || DEFAULT_SEATS_COUNT
-    @taken_seats_count = 0
-  end
   
-  def take_seat
-    return if free_seats_count <= 0 
-    @taken_seats_count += 1
-  end
-
-  def free_seats_count
-    @total_seats_count - @taken_seats_count
-  end
-
   def human_readable_type
     "пассажирский"
   end
@@ -30,5 +14,9 @@ class PassengerWagon < Wagon
 
   def assign_type
     @type = :passenger
+  end
+
+  def default_total_space
+    DEFAULT_SEATS_COUNT 
   end
 end

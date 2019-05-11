@@ -121,6 +121,14 @@ class Train
     add_self_to_station(@route_current_station)
   end
 
+  def free_space
+    @wagons.sum(&:free_space)
+  end
+
+  def taken_space
+    @wagons.sum(&:taken_space)
+  end
+
   def human_readable_type
     "обычный"
   end
