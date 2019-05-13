@@ -1,5 +1,6 @@
-# Создает тестовые данные (станции, поезда, вагоны) и связывает их между собой
+# frozen_string_literal: true
 
+# Создает тестовые данные (станции, поезда, вагоны) и связывает их между собой
 module RailRoadTest
   STATION_NAMES = [
     "Урýчча",
@@ -16,8 +17,8 @@ module RailRoadTest
     "Грýшаўка",
     "Міхалóва",
     "Пятрóўшчына",
-    "Малінаўка",
-  ]
+    "Малінаўка"
+  ].freeze
 
   # Используем class << self, чтобы можно было вызвать метод:
   # RailRoadTest.init(rail_road)
@@ -33,7 +34,6 @@ module RailRoadTest
     private
 
     def create_stations
-
       # ключ: название станции -> значение: объект "станция"
       STATION_NAMES.each do |station_name|
         @stations[station_name] = @rail_road.find_or_create_station(station_name)
@@ -58,8 +58,8 @@ module RailRoadTest
       @rail_road.add_wagon_to_train(train2)
       @rail_road.add_wagon_to_train(train2, 60)
 
-      train1.set_route(@route)
-      train2.set_route(@route)
+      train1.assign_route(@route)
+      train2.assign_route(@route)
     end
   end
 end

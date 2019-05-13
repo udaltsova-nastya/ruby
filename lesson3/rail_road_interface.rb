@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Интерфейс для управления железной дорогой
 class RailRoadInterface
   attr_reader :rail_road
 
@@ -8,7 +11,7 @@ class RailRoadInterface
   def run
     loop do
       action = main_menu_action
-      break if action == 0
+      break if action.zero?
 
       main_menu_process(action)
     end
@@ -26,6 +29,8 @@ class RailRoadInterface
     gets.chomp.to_i
   end
 
+  # rubocop:disable Metrics/MethodLength
+  # Ну, вот такое у нас большое меню...
   def train_menu_action
     puts "Управление поездами:"
     puts "0 - вернуться в главное меню"
@@ -40,6 +45,7 @@ class RailRoadInterface
     puts "9 - список вагонов в поезде"
     gets.chomp.to_i
   end
+  # rubocop:enable Metrics/MethodLength
 
   def station_menu_action
     puts "Управление станциями:"
@@ -53,12 +59,11 @@ class RailRoadInterface
   def route_menu_action
     puts "Управление маршрутами:"
     puts "0 - вернуться в главное меню"
-    puts "1 - создать маршрут" 
-    puts "2 - добавить станцию в маршрут" 
+    puts "1 - создать маршрут"
+    puts "2 - добавить станцию в маршрут"
     puts "3 - удалить станцию из маршрута"
     gets.chomp.to_i
   end
-
 
   def main_menu_process(action)
     case action
@@ -71,6 +76,8 @@ class RailRoadInterface
     end
   end
 
+  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
+  # Ну, вот такое у нас большое меню...
   def train_menu_process(action)
     case action
     when 1
@@ -80,10 +87,10 @@ class RailRoadInterface
     when 3
       remove_wagon_from_train
     when 4
-      set_route_to_train
+      assign_route_to_train
     when 5
       move_train_forward
-    when 6 
+    when 6
       move_train_backward
     when 7
       occupy_wagon
@@ -93,11 +100,12 @@ class RailRoadInterface
       show_train_wagons_list
     end
   end
+  # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength
 
   def station_menu_process(action)
     case action
     when 1
-      create_station(get_station_name)
+      create_station(ask_station_name)
     when 2
       show_stations_list
     when 3
@@ -116,13 +124,13 @@ class RailRoadInterface
     end
   end
 
-  def get_station_name
+  def ask_station_name
     puts "Введите название станции:"
     gets.chomp
   end
 
   def find_or_create_station
-    rail_road.find_or_create_station(get_station_name)
+    rail_road.find_or_create_station(ask_station_name)
   end
 
   def show_stations_list
@@ -140,7 +148,7 @@ class RailRoadInterface
   end
 
   def find_station
-    rail_road.find_station(get_station_name)
+    rail_road.find_station(ask_station_name)
   end
 
   def show_trains_list_on_station(station)
@@ -173,7 +181,7 @@ class RailRoadInterface
       end
     else
       puts "Поезд не найден"
-    end    
+    end
   end
 
   def create_station(station_name)
@@ -181,8 +189,8 @@ class RailRoadInterface
   end
 
   def create_route
-    first_station_name = get_station_name
-    last_station_name = get_station_name
+    first_station_name = ask_station_name
+    last_station_name = ask_station_name
     rail_road.create_route(first_station_name, last_station_name)
   end
 
@@ -196,19 +204,19 @@ class RailRoadInterface
     else
       puts "Маршрут не найден"
     end
+  end
 
-    def remove_station_from_route
-      route = select_route
-      if route
-        station = find_station
-        route.remove_station(station)
-      else
-        puts "Маршрут не найден"
-      end
+  def remove_station_from_route
+    route = select_route
+    if route
+      station = find_station
+      route.remove_station(station)
+    else
+      puts "Маршрут не найден"
     end
   end
 
-  def get_train_type
+  def ask_train_type
     puts "Введите тип поезда:"
     puts "1 - пассажирский (по умолчанию)"
     puts "2 - грузовой"
@@ -221,14 +229,14 @@ class RailRoadInterface
     end
   end
 
-  def get_train_number
+  def ask_train_number
     puts "Введите номер поезда"
     gets.chomp
   end
 
   def create_train
-    train_type = get_train_type
-    train_number = get_train_number
+    train_type = ask_train_type
+    train_number = ask_train_number
     train = rail_road.create_train(train_type, train_number)
     puts "Создан #{train}"
   rescue ArgumentError => e
@@ -254,7 +262,7 @@ class RailRoadInterface
   def add_wagon_to_train
     train = select_train
     if train
-      wagon_attributes = get_wagon_attributes(train)
+      wagon_attributes = ask_wagon_attributes(train)
       rail_road.add_wagon_to_train(train, wagon_attributes)
     else
       puts "Поезд не найден"
@@ -263,61 +271,75 @@ class RailRoadInterface
     puts "Общее количество вагонов в поезде: #{train.wagons_count}"
   end
 
-  def get_wagon_attributes(train)
+  def ask_wagon_attributes(train)
     case train.type
     when :cargo
-      puts "Укажите вместимость вагона (в тоннах)"
-      puts "По умолчанию #{rail_road.cargo_wagon_default_volume} тонн"
-      volume = gets.chomp.to_i
-      volume = nil if volume == 0
-      volume
+      ask_cargo_wagon_attributes
     when :passenger
-      puts "Укажите кол-во мест в вагоне"
-      puts "По умолчанию #{rail_road.passenger_wagon_default_seats_count} мест"
-      seats_count = gets.chomp.to_i
-      seats_count = nil if seats_count == 0
-      seats_count
-    else
-      nil
+      ask_passenger_wagon_attributes
     end
+  end
+
+  def ask_passenger_wagon_attributes
+    puts "Укажите кол-во мест в вагоне"
+    puts "По умолчанию #{rail_road.passenger_wagon_default_seats_count} мест"
+    seats_count = gets.chomp.to_i
+    seats_count = nil if seats_count.zero?
+    seats_count
+  end
+
+  def ask_cargo_wagon_attributes
+    puts "Укажите вместимость вагона (в тоннах)"
+    puts "По умолчанию #{rail_road.cargo_wagon_default_volume} тонн"
+    volume = gets.chomp.to_i
+    volume = nil if volume.zero?
+    volume
   end
 
   def occupy_wagon
     train = select_train
-    if train
-      wagon = select_wagon(train)
-      if wagon
-        case wagon.type
-        when :passenger
-          if wagon.take_space
-            puts "Место в вагоне успешно занято"
-            puts "Осталось свободных мест: #{wagon.free_space}"
-          else
-            puts "Не удалось занять место в вагоне"
-          end
-        when :cargo
-          puts "Доступно для загрузки #{wagon.free_space} тонн"
-          puts "Укажите объем загрузки (в тоннах):"
-          space = gets.chomp.to_i
-          if wagon.take_space(space)
-            puts "Вагон успешно загружен"
-            puts "Осталось свободного места для загрузки: #{wagon.free_space}"
-          else
-            puts "Не удалось загрузить вагон"
-          end
-        else
-          puts "Невозможно загрузить или занять место в данном типе вагона"
-        end
-      else
-        puts "Вагон не найден"
-      end
+    puts "Поезд не найден" && return unless train
+
+    wagon = select_wagon(train)
+    puts "Вагон не найден" && return unless wagon
+
+    occupy_wagon_by_type(wagon)
+  end
+
+  def occupy_wagon_by_type(wagon)
+    case wagon.type
+    when :passenger
+      occupy_passenger_wagon(wagon)
+    when :cargo
+      occupy_cargo_wagon(wagon)
     else
-      puts "Поезд не найден"
+      puts "Невозможно загрузить или занять место в данном типе вагона"
+    end
+  end
+
+  def occupy_passenger_wagon(wagon)
+    if wagon.take_space
+      puts "Место в вагоне успешно занято"
+      puts "Осталось свободных мест: #{wagon.free_space}"
+    else
+      puts "Не удалось занять место в вагоне"
+    end
+  end
+
+  def occupy_cargo_wagon(wagon)
+    puts "Доступно для загрузки #{wagon.free_space} тонн"
+    puts "Укажите объем загрузки (в тоннах):"
+    space = gets.chomp.to_i
+    if wagon.take_space(space)
+      puts "Вагон успешно загружен"
+      puts "Осталось свободного места для загрузки: #{wagon.free_space}"
+    else
+      puts "Не удалось загрузить вагон"
     end
   end
 
   def select_wagon(train)
-    return nil if train.wagons_count == 0
+    return nil if train.wagons_count.zero?
 
     puts "Выберите вагон: от 1 до #{train.wagons_count}"
     wagon_index = gets.chomp.to_i - 1
@@ -330,21 +352,17 @@ class RailRoadInterface
       train.remove_wagon
     else
       puts "Поезд не найден"
-    end  
+    end
   end
 
-  def set_route_to_train
+  def assign_route_to_train
     train = select_train
-    if train
-      route = select_route
-      if route
-        train.set_route(route)
-      else
-        puts "Маршрут не найден"
-      end
-    else
-      puts "Поезд не найден"
-    end
+    puts "Поезд не найден" && return unless train
+
+    route = select_route
+    puts "Маршрут не найден" && return unless route
+
+    train.assign_route(route)
   end
 
   def move_train_forward
@@ -362,6 +380,6 @@ class RailRoadInterface
       train.move_backward
     else
       puts "Поезд не найден"
-    end 
+    end
   end
 end

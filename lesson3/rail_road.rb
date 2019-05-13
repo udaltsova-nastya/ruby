@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # поезда, маршруты, станции
 class RailRoad
   attr_reader :trains, :stations, :routes
@@ -7,7 +9,7 @@ class RailRoad
     @trains = []
     @routes = []
   end
-  
+
   # возвращает станции по имени (объект класса), либо nil, если станция не найдена
   def find_station(station_name)
     @stations.find { |station| station.name == station_name }
@@ -26,6 +28,7 @@ class RailRoad
   def find_or_create_station(station_name)
     station = find_station(station_name)
     return station if station
+
     create_station(station_name)
   end
 
@@ -41,16 +44,16 @@ class RailRoad
   def find_route(route_name)
     @routes.find { |route| route.name == route_name }
   end
-  
+
   # создаем поезд указанного типа, по умолчанию - пассажирский
   def create_train(train_type, train_number)
-    if train_type == :cargo
-      new_train = CargoTrain.new(train_number)
-    else
-      new_train = PassengerTrain.new(train_number)
-    end
+    new_train = if train_type == :cargo
+                  CargoTrain.new(train_number)
+                else
+                  PassengerTrain.new(train_number)
+                end
     @trains << new_train
-    new_train 
+    new_train
   end
 
   # поиск поезда по его номеру
@@ -62,7 +65,7 @@ class RailRoad
     CargoWagon::DEFAULT_VOLUME
   end
 
-  def passenger_wagon_default_seats_count 
+  def passenger_wagon_default_seats_count
     PassengerWagon::DEFAULT_SEATS_COUNT
   end
 

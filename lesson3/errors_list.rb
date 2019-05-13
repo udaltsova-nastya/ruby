@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Обработка ошибок валидации
 module ErrorsList
   protected
 

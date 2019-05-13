@@ -1,26 +1,29 @@
+# frozen_string_literal: true
+
+require_relative "instance_counter"
+require_relative "errors_list"
+
 # Станция
 # 1. Имеет название, которое указывается при ее создании
 # 2. Может принимать поезда (по одному за раз)
 # 3. Может возвращать список всех поездов на станции, находящиеся в текущий момент
 # 4. Может возвращать список поездов на станции по типу (см. ниже): кол-во грузовых, пассажирских
 # 5. Может отправлять поезда (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции).
-# 6. В классе Station (жд станция) создать метод класса all, который возвращает все станции (объекты), созданные на данный момент
+# 6. В классе Station (жд станция) создать метод класса all, который возвращает все станции (объекты),
+#    созданные на данный момент
 # 7. написать метод, который принимает блок и проходит по всем поездам на станции, передавая каждый поезд в блок.
-require_relative "instance_counter"
-require_relative "errors_list"
-
 class Station
   include InstanceCounter
   include ErrorsList
 
-  NAME_PATTERN = /^[а-яa-z]/i
+  NAME_PATTERN = /^[а-яa-z]/i.freeze
   NAME_MIN_LENGTH = 3
 
   attr_reader :trains, :name
- 
+
   def initialize(name)
     # name переводим в string, чтобы дополнительно не проверять на nil
-    @name = name.to_s    
+    @name = name.to_s
     validate_name
     validate!
 
@@ -44,11 +47,11 @@ class Station
     @trains.delete(train)
   end
 
-
   ##
   # station.iterate_trains { |train| puts train.number }
   def iterate_trains
     raise ArgumentError, "Необходимо передать блок" unless block_given?
+
     @trains.each do |train|
       yield train
     end

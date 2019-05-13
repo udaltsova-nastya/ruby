@@ -1,3 +1,10 @@
+# frozen_string_literal: true
+
+require_relative "train_routes"
+require_relative "manufacturer"
+require_relative "instance_counter"
+require_relative "errors_list"
+
 # Поезд
 # 1. Имеет
 #   номер (произвольная строка)
@@ -8,41 +15,48 @@
 # 3. Может возвращать текущую скорость
 # 4. Может тормозить (сбрасывать скорость до нуля)
 # 5. Может возвращать количество вагонов
-# 6. Может прицеплять/отцеплять вагоны (по одному вагону за операцию, метод просто увеличивает или уменьшает количество вагонов).
+# 6. Может прицеплять/отцеплять вагоны (по одному вагону за операцию)
+#    метод просто увеличивает или уменьшает количество вагонов).
 # 6.1. Прицепка/отцепка вагонов может осуществляться только если поезд не движется.
-# 7. Может принимать маршрут следования (объект класса Route). 
+# 7. Может принимать маршрут следования (объект класса Route).
 # 8. При назначении маршрута поезду, поезд автоматически помещается на первую станцию в маршруте.
-# 9. Может перемещаться между станциями, указанными в маршруте. Перемещение возможно вперед и назад, но только на 1 станцию за раз.
+# 9. Может перемещаться между станциями, указанными в маршруте.
+#    Перемещение возможно вперед и назад, но только на 1 станцию за раз.
 # 10. Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
 
 # типы поездов относятся к классу в целом, поэтому ввела константы
 # также ввела ограничение по скорости, потому что поезд не может разгоняться до бесконечности и шаг разгона
 # Подключить модуль к классам Вагон и Поезд
 # Добавить к поезду атрибут Номер (произвольная строка), если его еще нет, который указыватеся при его создании
-# В классе Train создать метод класса find, который принимает номер поезда (указанный при его создании) 
+# В классе Train создать метод класса find, который принимает номер поезда (указанный при его создании)
 # и возвращает объект поезда по номеру или nil, если поезд с таким номером не найден.
 # написать метод, который принимает блок и проходит по всем вагонам поезда (вагоны должны быть во внутреннем массиве),
 # передавая каждый объект вагона в блок.
-require_relative "manufacturer"
-require_relative "instance_counter"
-require_relative "errors_list"
-
 class Train
+  include TrainRoutes
   include Manufacturer
   include InstanceCounter
   include ErrorsList
 
-  # три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет) и еще 2 буквы или цифры после дефиса
-  NUMBER_PATTERN = /^[a-zа-я0-9]{3}-?[a-zа-я0-9]{2}$/i
+  # три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет)
+  # и еще 2 буквы или цифры после дефиса
+  NUMBER_PATTERN = /^[a-zа-я0-9]{3}-?[a-zа-я0-9]{2}$/i.freeze
 
-  attr_reader :speed, :route_current_station, :number, :type, :wagons
- 
+  attr_reader :speed, :number, :type, :wagons
+
+  # rubocop:disable Style/ClassVars
+  # Рубокоп говорит:
+  #   You have to be careful when setting a value for a class variable;
+  #   if a class has been inherited, changing the value of a class variable also affects the inheriting classes.
+  #   This means that it's almost always better to use a class instance variable instead.
+  # Но в данном случае нам нужна именно переменная класса
   @@trains = {}
+  # rubocop:enable Style/ClassVars
 
   def self.find(number)
     @@trains[number]
   end
-    
+
   def initialize(number)
     @number = number
     validate_number
@@ -50,7 +64,7 @@ class Train
 
     @speed = 0
     @wagons = []
-    @@trains[number] = self 
+    @@trains[number] = self
     assign_type
     register_instance
   end
@@ -64,61 +78,27 @@ class Train
   end
 
   def decelerate
-    return if stopped? 
-    @speed -= speed_step
+    @speed -= speed_step if stopped?
   end
 
   def stopped?
-    @speed == 0
+    @speed.zero?
   end
-  
+
   def add_wagon(wagon)
     raise ArgumentError, "Выберите вагон согласно типу поезда" unless valid_wagon_type?(wagon)
     return unless stopped?
+
     @wagons << wagon
   end
-  
+
   # удаляет последний вагон из поезда
   def remove_wagon
-    return unless stopped?
-    @wagons.pop
+    @wagons.pop if stopped?
   end
 
   def wagons_count
     @wagons.size
-  end
-
-  # назначение маршрута, при назначении маршрута поезд перемещается на первую станцию маршрута
-  def set_route(route)
-    @route = route
-    move_to_route_first_station
-  end
-
-  def route_next_station
-    return nil if @route_current_station == @route.stations.last
-    @route.stations[route_current_station_index + 1]
-  end
-
-  def route_prev_station
-    return nil if @route_current_station == @route.stations.first
-    @route.stations[route_current_station_index - 1]
-  end
-
-  # Перемещение вперед по маршруту на одну станцию
-  def move_forward
-    raise StandardError, "Не задан маршрут" unless @route
-    raise StandardError, "Поезд уже на последней станции маршрута" unless route_next_station
-    remove_self_from_station(@route_current_station)
-    @route_current_station = route_next_station
-    add_self_to_station(@route_current_station)
-  end
-
-  def move_backward
-    raise StandardError, "Не задан маршрут" unless @route
-    raise StandardError, "Поезд уже на первой станции маршрута" unless route_prev_station
-    remove_self_from_station(@route_current_station)
-    @route_current_station = route_prev_station
-    add_self_to_station(@route_current_station)
   end
 
   def free_space
@@ -133,21 +113,16 @@ class Train
     "обычный"
   end
 
-  def to_s
-    "#{human_readable_type} поезд № #{number}"
-  end
-
   # train.iterate_wagons { |wagon, wagon_number| ... }
   def iterate_wagons
     raise ArgumentError, "Необходимо передать блок" unless block_given?
-    @wagons.each.with_index(1) do |wagon, wagon_number|
-      yield wagon, wagon_number
-    end
+
+    @wagons.each.with_index(1) { |wagon, wagon_number| yield wagon, wagon_number }
   end
 
   protected
 
-  # эти методы можно переопределить в подклассах 
+  # эти методы можно переопределить в подклассах
 
   def max_speed
     200
@@ -160,7 +135,7 @@ class Train
   # установить тип поезда
   def assign_type
     @type = :standard
-  end 
+  end
 
   # проверка что переданный вагон имеет соответствующий поезду тип (пассажирский или грузовой)
   def valid_wagon_type?(wagon)
@@ -168,16 +143,6 @@ class Train
   end
 
   private
-
-  # это внутренний метод, не требует переопределения
-  def route_current_station_index
-    @route.stations.index(@route_current_station)
-  end
-
-  def move_to_route_first_station
-    @route_current_station = @route.stations.first
-    add_self_to_station(@route_current_station)
-  end
 
   # уведомляем станцию, что на нее прибыл поезд
   def add_self_to_station(station)

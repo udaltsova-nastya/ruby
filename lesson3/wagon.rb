@@ -1,6 +1,9 @@
-# Подключить модуль к классам Вагон и Поезд
-require_relative 'manufacturer'
+# frozen_string_literal: true
 
+# Подключить модуль к классам Вагон и Поезд
+require_relative "manufacturer"
+
+# Вагон (родительский класс)
 class Wagon
   include Manufacturer
   attr_reader :type, :taken_space
@@ -16,8 +19,7 @@ class Wagon
   end
 
   def take_space(space = default_take_space)
-    return if free_space <= 0 
-    @taken_space += space
+    @taken_space += space if free_space >= space
   end
 
   def free_space
