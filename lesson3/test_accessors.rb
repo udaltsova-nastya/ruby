@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "accessors"
 
 class Dog
@@ -28,4 +30,3 @@ puts "a cat plays only with another #{cat.plays_with.class}"
 cat.plays_with = dog
 puts cat.plays_with.class
 # => ArgumentError
-

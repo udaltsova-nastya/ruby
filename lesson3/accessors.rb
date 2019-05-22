@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# .attr_accessor_with_history :attribute_name, ...
+# .strong_attr_accessor :attribute_name
 module Accessors
   # Модуль говорит: когда меня (self) включают (included) в какой-то класс (klass)
   # мне нужно
@@ -5,12 +9,11 @@ module Accessors
   # 2. подключить методы из InstanceMethods в klass в качастве инстанс-методов
   def self.included(klass)
     klass.extend ClassMethods
-    # klass.send :include, InstanceMethods
   end
 
   # :nodoc:
   module ClassMethods
-    # Этот метод динамически создает геттеры и сеттеры 
+    # Этот метод динамически создает геттеры и сеттеры
     # для любого кол-ва атрибутов,
     # при этом сеттер сохраняет все значения инстанс-переменной при изменении этого значения.
     # Пример вызова:
@@ -18,41 +21,35 @@ module Accessors
     # # => создает три метода
     #
     # # reader
-    # def wagons
-    #   @wagons
-    # end
+    # attr_reader :wagons
     #
     # # writer
     # def wagons=(wagons)
-    #   @wagons = wagons
+    #   @wagons_history << wagons if @wagons_history
     #   @wagons_history ||= []
-    #   @wagons_history << wagons
+    #   @wagons = wagons
     # end
     #
     # # history
-    # def wagon_history
-    #   @wagon_history  
-    # end
+    # attr_reader :wagon_history
     def attr_accessor_with_history(*attributes)
       # attributes - массив переданных значений
       attributes.each do |attribute|
-        self.class_eval(
+        class_eval(
           <<-"INSTANCE_DEFINITIONS"
             # reader
-            def #{attribute}
-              @#{attribute}
-            end
-
-            # writer
-            def #{attribute}=(#{attribute})
-              @#{attribute} = #{attribute}
-              @#{attribute}_history ||= []
-              @#{attribute}_history << #{attribute}
-            end
+            attr_reader :#{attribute}
 
             # history
-            def #{attribute}_history
-              @#{attribute}_history
+            attr_reader :#{attribute}_history
+
+            # writer
+            # Нужно сохранять предыдущее значение
+            def #{attribute}=(#{attribute})
+              # Наверно нам не нужно сохранять первоначальный nil в историю?
+              @#{attribute}_history << @#{attribute} if @#{attribute}_history
+              @#{attribute}_history ||= []
+              @#{attribute} = #{attribute}
             end
           INSTANCE_DEFINITIONS
         )
@@ -60,12 +57,10 @@ module Accessors
     end
 
     def strong_attr_accessor(attribute, klass)
-      self.class_eval(
+      class_eval(
         <<-"INSTANCE_DEFINITIONS"
           # reader
-          def #{attribute}
-            @#{attribute}
-          end
+          attr_reader :#{attribute}
 
           # writer
           def #{attribute}=(#{attribute})
@@ -76,8 +71,4 @@ module Accessors
       )
     end
   end
-
-  # :nodoc:
-  # module InstanceMethods
-  # end
 end
