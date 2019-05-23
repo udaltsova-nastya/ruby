@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # .attr_accessor_with_history :attribute_name, ...
-# .strong_attr_accessor :attribute_name
+# .strong_attr_accessor :attribute_name, Klass
 module Accessors
   # Модуль говорит: когда меня (self) включают (included) в какой-то класс (klass)
   # мне нужно

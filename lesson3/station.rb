@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "instance_counter"
-require_relative "errors_list"
+require_relative "validation"
 
 # Станция
 # 1. Имеет название, которое указывается при ее создании
@@ -14,17 +14,20 @@ require_relative "errors_list"
 # 7. написать метод, который принимает блок и проходит по всем поездам на станции, передавая каждый поезд в блок.
 class Station
   include InstanceCounter
-  include ErrorsList
-
-  NAME_PATTERN = /^[а-яa-z]/i.freeze
-  NAME_MIN_LENGTH = 3
+  include Validation
+  
+  # Название начинается с буквы (русской или английской),
+  # длина названия не менее трёх символов
+  NAME_PATTERN = /^[а-яa-z].{2,}/i.freeze
 
   attr_reader :trains, :name
+
+  validate :name, :presence
+  validate :name, :format, NAME_PATTERN
 
   def initialize(name)
     # name переводим в string, чтобы дополнительно не проверять на nil
     @name = name.to_s
-    validate_name
     validate!
 
     @trains = []
@@ -55,14 +58,5 @@ class Station
     @trains.each do |train|
       yield train
     end
-  end
-
-  protected
-
-  def validate_name
-    # имя не должно быть пустым
-    # должно начинаться с буквы и содержать не менее 3х символов
-    add_error("Название станции должно содержать не менее трех символов") if name.length < NAME_MIN_LENGTH
-    add_error("Название станции должно начинаться с буквы") unless NAME_PATTERN.match?(name)
   end
 end

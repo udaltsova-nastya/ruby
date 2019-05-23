@@ -15,6 +15,7 @@
 # validate :name, :presence
 # validate :name, :format, /A-Z/
 # validate :name, :type, String
+# validate :wagons, :type, [Wagon]
 # Все указанные валидаторы должны применяться к атрибуту
 # Допустимо, что модуль не будет работать с наследниками.
 # Подключить эти модули в свои классы и продемонстрировать их использование.
@@ -81,13 +82,24 @@ module Validation
     def validate_presence(attribute, value, _option)
       return if !value.nil? && value != ""
 
-      raise Validation::PresenceError, "Не указано значение аттрибута #{attribute}"
+      raise Validation::PresenceError, "Не указано, значение аттрибута #{attribute}"
     end
 
-    def validate_type(attribute, value, klass)
-      return if value.is_a?(klass)
+    # validate :name, :type, String
+    # или
+    # validate :wagons, :type, [Wagon]
+    def validate_type(attribute, value, type)
+      if type.is_a?(Array)
+        klass = type[0]
+        return if value.all? { |element| element.is_a?(klass) }
+        message = "Все элементы #{attribute} должны принадлежать классу #{klass}"
+      else
+        klass = type
+        return if value.is_a?(klass)  
+        message = "Значение аттрибута #{attribute} должно принадлежать классу #{klass}"
+      end
 
-      raise Validation::TypeError, "Значение аттрибута #{attribute} должно принадлежать классу #{klass}"
+      raise Validation::TypeError, message
     end
 
     def validate_format(attribute, value, pattern)

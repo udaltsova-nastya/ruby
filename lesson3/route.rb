@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require_relative "instance_counter"
-require_relative "errors_list"
+require_relative "validation"
+require_relative "station"
 
 # Маршрут
 # 1. Имеет начальную и конечную станцию,
@@ -13,18 +14,23 @@ require_relative "errors_list"
 # 5. Может выводить список всех станций по-порядку от начальной до конечной
 class Route
   include InstanceCounter
-  include ErrorsList
+  include Validation
 
   attr_reader :name
 
-  def initialize(first_station, last_station)
-    validate_stations(first_station, last_station)
-    validate!
+  validate :first_station, :presence
+  validate :first_station, :type, Station
+  validate :last_station, :presence
+  validate :last_station, :type, Station
+  validate :middle_stations, :type, [Station]
 
+  def initialize(first_station, last_station)
     @name = "#{first_station.name} - #{last_station.name}"
     @first_station = first_station
     @last_station = last_station
     @middle_stations = []
+    validate!
+
     register_instance
   end
 
@@ -32,32 +38,15 @@ class Route
   # Оставила свое решение, чтобы не вводить дополнительную проверку на предмет неприкосновенности
   # первой и последней станций
   def add_station(index, station)
-    validate_station(station, "Промежуточная станция")
-    validate!
-
     @middle_stations.insert(index - 1, station)
+    validate!
   end
 
   def remove_station(station)
-    validate_station(station, "Промежуточная станция")
-    validate!
-
     @middle_stations.delete(station)
   end
 
   def stations
     [@first_station] + @middle_stations + [@last_station]
-  end
-
-  protected
-
-  def validate_stations(first_station, last_station)
-    validate_station(first_station, "Первая станция")
-    validate_station(last_station, "Последняя станция")
-  end
-
-  def validate_station(station, station_label)
-    add_error("#{station_label} должна быть задана") if station.nil?
-    add_error("#{station_label} должна иметь название (name)") unless station.respond_to?(:name)
   end
 end
